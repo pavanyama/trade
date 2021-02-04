@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traders Data</title>
+<style>
+    * {
+  box-sizing: border-box
+}
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Dosis', sans-serif;
+  line-height: 1.6;
+  color: #666;
+  background: #F6F6F6;
+}
+#root {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+h1 {
+  text-align: center;
+  padding: 1.5rem 2.5rem;
+  background-image: linear-gradient(120deg, #fbc2eb 0%, #a6c1ee 100%);
+  margin: 0 0 2rem 0;
+  font-size: 1.5rem;
+  color: white;
+}
+p {
+  padding: 0 2.5rem 2.5rem;
+  margin: 0;
+}
+.container {
+  display: flex;
+  flex-wrap: wrap;
+}
+@media screen and (min-width: 600px) {
+  .card {
+    flex: 1 1 calc(50% - 2rem);
+  }
+}
+@media screen and (min-width: 900px) {
+  .card {
+    flex: 1 1 calc(33% - 2rem);
+  }
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+th {
+  text-align: left;
+  padding: 16px;
+}
+td {
+  text-align: left;
+  padding: 16px;
+}
+redtd {
+  text-align: left;
+  padding: 16px;
+  color: red;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+
+function loadData(){
+	var inputs = [
+		["36.52", "40", "PYPL210219C00200000"],
+		["14.85", "17.50", "SKYY210219C00080000"],
+		["16.98","20","XLK210219C00112000"],
+		["50.5","56", "ADBE210219C00440000"],
+		["26.9","30","FDN210219C00190000"],
+		["47.77","53","DOCU210219C00200000"],
+		["20.35","25","AAPL210219C00110000"],		
+ 		["16.55","20","PWR210219C00060000"],
+		["48.3","55","IGV210219C00300000"],		
+		["41.23","46","SQ210219C00190000"],
+		["22.1","25","TAN210219C00100000"],
+		["9.7", "13", "XHB210219C00050000"],
+		["45.6", "50", "ANSS210219C00310000"],
+		["23.57", "27", "XBI210219C00126000"],
+		["10.5", "14", "XRT210219C00058000"],
+ 		["11.95", "13.5", "AAPL210219C00100000", "AAPL210219C00115000"],
+		["20.03","23","ADBE210219C00415000","ADBE210219C00440000"],
+		["8.15","9.75","SKYY210219C00081000","SKYY210219C00091000"],
+		["7.97","9.5","AMD210219C00075000","AMD210219C00085000"],
+		["15.55","18.50","ANSS210219C00320000","ANSS210219C00340000"],
+		["11.42","14","SQ210219C00185000","SQ210219C00200000"],
+		["8.8","10","XLK210319C00114000","XLK210319C00125000"],
+		["16.20","17.5","IGV210219C00300000","IGV210219C00320000"],
+		["10.3","13","FDN210219C00192000","FDN210219C00205000"],
+		["8.1","8.6","XBI210219C00112000","XBI210219C00122000"],
+		["16", "18.50","RH210219C00400000", "RH210219C00420000"],
+		["14.65","18","DOCU210219C00200000","DOCU210219C00220000 "],
+		["12.08.","15","PYPL210219C00195000","PYPL210219C00210000"],
+		["7.25.","8.5","TAN210219C00080000","TAN210219C00090000"]
+	];
+	
+	getDataAndRender(inputs);
+	sortTable(3);
+}
+
+function sortTable(n) {
+  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  table = document.getElementById("myTable");
+  switching = true;
+  dir = "asc";
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+    for (i = 1; i < (rows.length - 1); i++) {
+      shouldSwitch = false;
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      if (dir == "asc") {
+        if (parseInt(x.innerHTML.toLowerCase()) > parseInt(y.innerHTML.toLowerCase())) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (dir == "desc") {
+        if (parseInt(x.innerHTML.toLowerCase()) < parseInt(y.innerHTML.toLowerCase())) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount ++;
+    } else {
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
+window.onload = function() {
+  loadData();
+};
+
+function getDataAndRender(inputs){
+
+	inputs.forEach(input => {
+	
+		var dataModel = new DataModel();
+		dataModel.suggLow = input[0];
+		dataModel.suggHigh = input[1];
+		dataModel.ticker = input[2];
+		dataModel.strikePrice = parseFloat(dataModel.ticker.slice(-8, -3) + "." + dataModel.ticker.slice(-3));
+		dataModel.callOrPut = dataModel.ticker.slice(-9 -8);
+		
+		expDate = "20"+dataModel.ticker.slice(-15, -13)+"-"+dataModel.ticker.slice(-13, -11)+"-"+dataModel.ticker.slice(-11, -9);
+		symbol = dataModel.ticker.slice(-dataModel.ticker.length, -15);
+		var url = "https://sandbox.tradier.com/v1/markets/options/chains?expiration="+expDate+"&symbol="+symbol;
+
+		var myHeaders = new Headers();
+		myHeaders.append("Authorization", "Bearer FNtXUAppXVXP2UKczwhEy1dGBFWZ");
+		myHeaders.append("Accept", "application/json");
+
+		var requestOptions = {
+		  method: 'GET',
+		  headers: myHeaders,
+		  redirect: 'follow'
+		};
+	
+		fetch(url, requestOptions)
+		.then(response => {
+			console.log(response);
+			return response.json();
+		})
+		.then(jsonData => {
+			jsonData.options.option.forEach(option => {
+				if(option.symbol === dataModel.ticker){
+					dataModel.description = option.description;
+					dataModel.currentPrice = option.last;
+					dataModel.changePercent = option.change_percentage;	
+					if(input.length == 3) {	
+						buildRow(dataModel);
+					} else {
+						buildSpread(input, dataModel);
+					}				
+					
+				}
+			});
+		});
+	});
+}
+
+function buildSpread(input, dataModel1) {
+
+	var dataModel2 = new DataModel();
+	dataModel2.suggLow = input[0];
+	dataModel2.suggHigh = input[1];
+	dataModel2.ticker = input[3];
+	dataModel2.strikePrice = parseFloat(dataModel2.ticker.slice(-8, -3) + "." + dataModel2.ticker.slice(-3));
+	//dataModel2.callOrPut = dataModel2.ticker.slice(-9 -8);
+	
+	expDate = "20"+dataModel2.ticker.slice(-15, -13)+"-"+dataModel2.ticker.slice(-13, -11)+"-"+dataModel2.ticker.slice(-11, -9);
+	symbol = dataModel2.ticker.slice(-dataModel2.ticker.length, -15);
+	var url = "https://sandbox.tradier.com/v1/markets/options/chains?expiration="+expDate+"&symbol="+symbol;
+
+	var myHeaders = new Headers();
+	myHeaders.append("Authorization", "Bearer FNtXUAppXVXP2UKczwhEy1dGBFWZ");
+	myHeaders.append("Accept", "application/json");
+
+	var requestOptions = {
+	  method: 'GET',
+	  headers: myHeaders,
+	  redirect: 'follow'
+	};
+	
+	fetch(url, requestOptions)
+	.then(response => {
+		console.log(response);
+		return response.json();
+	})
+	.then(jsonData => {
+		jsonData.options.option.forEach(option => {
+			if(option.symbol === dataModel2.ticker){
+				dataModel2.description = dataModel1.description + " <br> " + option.description;
+				dataModel2.ticker = dataModel1.ticker + " <br/> "+ dataModel2.ticker;
+				dataModel2.currentPrice = (dataModel1.currentPrice - option.last).toFixed(2);
+				dataModel2.changePercent = dataModel1.changePercent + " <br/> " + option.change_percentage;
+				dataModel2.spreadOrCall = "Spread";
+				buildRow(dataModel2);
+			}
+		});
+	});
+
+}
+
+function buildRow(preasentation) {
+	const myTable = document.getElementById('myTable');
+	const tr = document.createElement('tr');
+
+	tr.style.fontWeight='900';  
+	myTable.appendChild(tr);
+	
+	const descriptionTd = document.createElement('td');
+	descriptionTd.innerHTML = preasentation.description;
+	tr.appendChild(descriptionTd);
+
+	const rangeTd = document.createElement('td');
+	rangeTd.innerHTML = preasentation.range();
+	tr.appendChild(rangeTd);
+
+	const currentPriceTd = document.createElement('td');
+	currentPriceTd.innerHTML = preasentation.currentPrice;
+		
+	
+	tr.appendChild(currentPriceTd);
+ 
+	const isInRangeTd = document.createElement('td');
+	isInRangeTd.innerHTML = preasentation.isInRange();
+	isInRangeTd.style.display="none";
+	tr.appendChild(isInRangeTd);
+	
+	const diffPerceFromSuggLowTd = document.createElement('td');
+	diffPerceFromSuggLowTd.innerHTML = preasentation.diffPerceFromSuggLow()+"%";
+	if(preasentation.isInRange()==1){
+		diffPerceFromSuggLowTd.style.backgroundColor='#F1C40F'; //yellow
+	} else if(preasentation.isInRange()==-0){
+		diffPerceFromSuggLowTd.style.backgroundColor='#3CB371'; //green
+	} else if(preasentation.isInRange()==-1){
+		diffPerceFromSuggLowTd.style.backgroundColor='#FFA07A'; //red
+	}
+	tr.appendChild(diffPerceFromSuggLowTd);
+	
+	const diffPerceFromSuggHighTd = document.createElement('td');
+	diffPerceFromSuggHighTd.innerHTML = preasentation.diffPerceFromSuggHigh()+"%";
+	if(preasentation.isInRange()==1){
+		diffPerceFromSuggHighTd.style.backgroundColor='#F1C40F'; //yellow
+	} else if(preasentation.isInRange()==-0){
+		diffPerceFromSuggHighTd.style.backgroundColor='#3CB371'; //green
+	} else if(preasentation.isInRange()==-1){
+		diffPerceFromSuggHighTd.style.backgroundColor='#FFA07A'; //red
+	}
+	tr.appendChild(diffPerceFromSuggHighTd);
+	
+	const changePercentTd = document.createElement('td');
+	changePercentTd.innerHTML = preasentation.changePercent+"%";
+	tr.appendChild(changePercentTd);
+}
+function DataModel(){
+	//These doesn't change for spread or not.
+	this.symbol ;
+	this.spreadOrCall = "Call" ;
+	this.suggLow ;
+	this.suggHigh ;
+	this.expDate;
+	this.callOrPut;
+	//These will change for spread.
+	this.strikePrice ;
+	this.currentPrice ;
+	this.description;
+	this.ticker;
+	this.bid;
+	this.ask;
+	this.volume;
+	this.changePercent;
+	
+	const multiplier = 10000;
+	this.setTicker = function(ticker){
+		this.ticker = ticker;
+		this.strikePrice = parseFloat(this.ticker.slice(-8, -3) + "." + this.ticker.slice(-3));
+		this.callOrPut = this.ticker.slice(-9 -8);
+		this.expDate = "20"+this.ticker.slice(-15, -13)+"-"+this.ticker.slice(-13, -11)+"-"+this.ticker.slice(-11, -9);
+		this.symbol = this.ticker.slice(-this.ticker.length, -15);
+		this.getDataFromTradier(this);
+	}
+	
+	this.range = function() {
+		return this.suggLow + " - " + this.suggHigh;
+	}
+	this.diffFromSuggLow = function(){
+		return (this.currentPrice*10000 - this.suggLow*10000)/10000;
+	}
+	this.diffFromSuggHigh = function(){
+		return (this.currentPrice*10000 - this.suggHigh*10000)/10000;
+	}
+	this.differenceFromMedian = function(){
+		return this.currentPrice - (parseInt(this.suggHigh) + parseInt(this.suggLow))/2;		
+	}
+	this.differencePercFromMedian = function(){
+		return ((((this.currentPrice*100)) / (((parseInt(this.suggHigh) + parseInt(this.suggLow))/2)))  - 100).toFixed(2)+"%";		
+	}
+	this.diffPerceFromSuggHigh = function() {
+		return (((parseFloat(this.currentPrice)/parseFloat(this.suggHigh))*100) - 100).toFixed(2);
+	}
+	this.diffPerceFromSuggLow = function() {
+		return (((parseFloat(this.currentPrice)/parseFloat(this.suggLow))*100) - 100).toFixed(2)
+	}	
+	this.isInRange = function(){
+		if(parseFloat(this.currentPrice) >= parseFloat(this.suggLow) && parseFloat(this.currentPrice) <= parseFloat(this.suggHigh)){
+			return 0; //green
+		} else if(parseFloat(this.currentPrice) < parseFloat(this.suggLow)) {
+			return 1; //yellow
+		} else if(parseFloat(this.currentPrice) > parseFloat(this.suggHigh)){
+			return -1; //red
+		}
+	}
+	
+	this.backgroundColor = function() {
+		if (this.currentPrice > this.suggHigh)  
+			return "green";
+		else if(this.currentPrice < this.suggLow) 
+			return "red";
+		else if(this.currentPrice >= this.suggLow || this.currentPrice <= this.suggHigh) 
+			return "yellow";		
+	}
+}
+
+</script>
+<table id="myTable" border="1" align="center" valign="center">
+    <tr>
+		<th onclick="sortTable(0)">Description</th>
+        <th onclick="sortTable(1)">Sugg Range</th>
+        <th onclick="sortTable(2)">CurrentPrice</th>
+        <th style="display:none" onclick="sortTable(3)">Is in range?</th>
+		<th onclick="sortTable(4)" 
+		title="this show how much percentage is different from what peddayana said.">Sugg Low Vs Current <br>Diff%</th>
+        <th onclick="sortTable(5)" 
+		title="this show how much percentage is different from what peddayana said.">Sugg High Vs Current <br>Diff%</th>
+		<th onclick="sortTable(6)">Today option <br>%change</th>
+    </tr>
+</table>
+</body>
+</html>
